@@ -1,4 +1,4 @@
-#include <reshade.hpp>
+#include "stdafx.hpp"
 
 extern "C" __declspec(dllexport) const char *NAME = "ReShade Recorder";
 extern "C" __declspec(dllexport) const char *DESCRIPTION = "";
