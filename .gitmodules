@@ -1,3 +1,6 @@
 [submodule "reshade"]
 	path = deps/reshade
 	url = https://github.com/crosire/reshade.git
+[submodule "deps/reshade-shaders"]
+	path = deps/reshade-shaders
+	url = https://github.com/crosire/reshade-shaders.git
