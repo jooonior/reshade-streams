@@ -39,8 +39,8 @@ static void on_reshade_reloaded_effects(reshade::api::effect_runtime *runtime)
 	}
 }
 
-extern "C" __declspec(dllexport) const char *NAME = "ReShade Recorder";
-extern "C" __declspec(dllexport) const char *DESCRIPTION = "";
+extern "C" __declspec(dllexport) const char *NAME = "Streams";
+extern "C" __declspec(dllexport) const char *DESCRIPTION = "High-performance video capture of game buffers and custom effect streams.";
 
 BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
 {

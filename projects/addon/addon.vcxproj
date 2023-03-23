@@ -73,25 +73,25 @@
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
     <OutDir>$(SolutionDir)bin\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Platform)_$(Configuration)\$(ProjectName)\</IntDir>
-    <TargetName>$(SolutionName)</TargetName>
+    <TargetName>Streams</TargetName>
     <TargetExt>.addon</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>$(SolutionDir)bin\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Platform)_$(Configuration)\$(ProjectName)\</IntDir>
-    <TargetName>$(SolutionName)</TargetName>
+    <TargetName>Streams</TargetName>
     <TargetExt>.addon</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Platform)_$(Configuration)\$(ProjectName)\</IntDir>
-    <TargetName>$(SolutionName)</TargetName>
+    <TargetName>Streams</TargetName>
     <TargetExt>.addon</TargetExt>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <OutDir>$(SolutionDir)bin\$(Platform)_$(Configuration)\$(ProjectName)\</OutDir>
     <IntDir>$(SolutionDir)bin\$(Platform)_$(Configuration)\$(ProjectName)\</IntDir>
-    <TargetName>$(SolutionName)</TargetName>
+    <TargetName>Streams</TargetName>
     <TargetExt>.addon</TargetExt>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
