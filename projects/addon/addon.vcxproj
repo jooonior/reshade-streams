@@ -178,6 +178,7 @@
   <ItemGroup>
     <ClInclude Include="addon.hpp" />
     <ClInclude Include="stdafx.hpp" />
+    <ClInclude Include="stream.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
