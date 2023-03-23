@@ -32,6 +32,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <LocalDebuggerWorkingDirectory>$(TargetDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -39,6 +40,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <LocalDebuggerWorkingDirectory>$(TargetDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -46,6 +48,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <LocalDebuggerWorkingDirectory>$(TargetDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
@@ -53,6 +56,7 @@
     <PlatformToolset>v143</PlatformToolset>
     <WholeProgramOptimization>true</WholeProgramOptimization>
     <CharacterSet>Unicode</CharacterSet>
+    <LocalDebuggerWorkingDirectory>$(TargetDir)</LocalDebuggerWorkingDirectory>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
@@ -112,6 +116,9 @@
     </Link>
     <CustomBuildStep>
       <TreatOutputAsContent>true</TreatOutputAsContent>
+      <Command>copy "$(SolutionDir)deps\reshade\bin\$(Platform)\Release\ReShade64.dll" "$(OutDir)dxgi.dll"</Command>
+      <Outputs>$(OutDir)dxgi.dll</Outputs>
+      <Inputs>$(SolutionDir)deps\reshade\bin\$(Platform)\Release\ReShade64.dll</Inputs>
     </CustomBuildStep>
     <CustomBuild>
       <Command>copy %(Identity) "$(OutDir)" &gt; NUL</Command>
@@ -144,6 +151,9 @@
     </Link>
     <CustomBuildStep>
       <TreatOutputAsContent>true</TreatOutputAsContent>
+      <Command>copy "$(SolutionDir)deps\reshade\bin\$(Platform)\Release\ReShade64.dll" "$(OutDir)dxgi.dll"</Command>
+      <Outputs>$(OutDir)dxgi.dll</Outputs>
+      <Inputs>$(SolutionDir)deps\reshade\bin\$(Platform)\Release\ReShade64.dll</Inputs>
     </CustomBuildStep>
     <CustomBuild>
       <Command>copy %(Identity) "$(OutDir)" &gt; NUL</Command>
@@ -177,6 +187,9 @@
     </Link>
     <CustomBuildStep>
       <TreatOutputAsContent>true</TreatOutputAsContent>
+      <Command>copy "$(SolutionDir)deps\reshade\bin\$(Platform)\Release\ReShade32.dll" "$(OutDir)dxgi.dll"</Command>
+      <Outputs>$(OutDir)dxgi.dll</Outputs>
+      <Inputs>$(SolutionDir)deps\reshade\bin\$(Platform)\Release\ReShade32.dll</Inputs>
     </CustomBuildStep>
     <CustomBuild>
       <Command>copy %(Identity) "$(OutDir)" &gt; NUL</Command>
@@ -210,6 +223,9 @@
     </Link>
     <CustomBuildStep>
       <TreatOutputAsContent>true</TreatOutputAsContent>
+      <Command>copy "$(SolutionDir)deps\reshade\bin\$(Platform)\Release\ReShade32.dll" "$(OutDir)dxgi.dll"</Command>
+      <Outputs>$(OutDir)dxgi.dll</Outputs>
+      <Inputs>$(SolutionDir)deps\reshade\bin\$(Platform)\Release\ReShade32.dll</Inputs>
     </CustomBuildStep>
     <CustomBuild>
       <Command>copy %(Identity) "$(OutDir)" &gt; NUL</Command>
@@ -246,6 +262,16 @@
       <FileType>Document</FileType>
       <DeploymentContent>true</DeploymentContent>
     </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <CustomBuild Include="ReShade.ini">
+      <FileType>Document</FileType>
+    </CustomBuild>
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\addon\addon.vcxproj">
+      <Project>{6e62b98c-5cce-471b-b756-c19176b951ed}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
