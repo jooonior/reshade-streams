@@ -24,6 +24,9 @@
     <ClCompile Include="overlay.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="$(SolutionDir)deps\reshade\deps\imgui\misc\cpp\imgui_stdlib.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.hpp">
