@@ -4,3 +4,6 @@
 [submodule "deps/reshade-shaders"]
 	path = deps/reshade-shaders
 	url = https://github.com/crosire/reshade-shaders.git
+[submodule "boost_preprocessor"]
+	path = deps/boost_preprocessor
+	url = https://github.com/boostorg/preprocessor
