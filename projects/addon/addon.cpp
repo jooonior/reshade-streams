@@ -1,5 +1,6 @@
 #include "stdafx.hpp"
 #include "addon.hpp"
+#include "overlay.hpp"
 
 #include <string>
 
@@ -52,6 +53,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
 		reshade::register_event<reshade::addon_event::init_effect_runtime>(on_init_effect_runtime);
 		reshade::register_event<reshade::addon_event::destroy_effect_runtime>(on_destroy_effect_runtime);
 		reshade::register_event<reshade::addon_event::reshade_reloaded_effects>(on_reshade_reloaded_effects);
+		reshade::register_overlay("Streams", draw_overlay);
 		break;
 	case DLL_PROCESS_DETACH:
 		reshade::unregister_addon(hModule);

@@ -8,4 +8,5 @@ struct stream
 {
 	reshade::api::effect_texture_variable texture_variable;
 	std::string variable_name;
+	bool selected;
 };
