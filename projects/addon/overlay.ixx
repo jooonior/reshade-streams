@@ -12,11 +12,21 @@ export module overlay;
 import config;
 import stream;
 
+template<typename... Args>
+void tooltip(const char *fmt, Args... args)
+{
+	if (ImGui::IsItemHovered(ImGuiHoveredFlags_AllowWhenDisabled))
+	{
+		ImGui::SetTooltip(fmt, args...);
+	}
+}
+
 export void draw_settings_overlay(reshade::api::effect_runtime *runtime)
 {
 	runtime_data &data = runtime->get_private_data<runtime_data>();
 
 	ImGui::InputText("Stream Prefix", &data.config.StreamPrefix);
+	tooltip("Only variables named with this prefix will be listed as streams. Change requires reloading effects.");
 }
 
 export void draw_overlay(reshade::api::effect_runtime *runtime)
