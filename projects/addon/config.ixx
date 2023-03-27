@@ -62,6 +62,9 @@ export class config
 public:
 	REFLECT(
 		(std::string)(OutputName)(""),
+		(std::string)(OutputExtension)("mp4"),
+		(std::string)(FFmpegPath)("ffmpeg"),
+		(std::string)(FFmpegArgs)("-c:v libx264 -preset ultrafast -crf 18"),
 		(int)(Framerate)(0),
 		(float)(OverlayListWidth)(180.0f),
 		(std::string)(StreamPrefix)("STREAM_")

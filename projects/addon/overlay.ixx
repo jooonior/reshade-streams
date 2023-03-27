@@ -27,6 +27,8 @@ export void draw_settings_overlay(reshade::api::effect_runtime *runtime)
 
 	ImGui::InputText("Stream Prefix", &data.config.StreamPrefix);
 	tooltip("Only variables named with this prefix will be listed as streams. Change requires reloading effects.");
+	ImGui::InputText("FFmpeg Path", &data.config.FFmpegPath);
+	tooltip("Path to FFmpeg executable. Can be absolute, relative, or just filename (to search PATH).");
 }
 
 export void draw_overlay(reshade::api::effect_runtime *runtime)
@@ -34,13 +36,30 @@ export void draw_overlay(reshade::api::effect_runtime *runtime)
 	runtime_data &data = runtime->get_private_data<runtime_data>();
 	reshade::api::device *device = runtime->get_device();
 
-	ImGui::Button("Start Recording", { ImGui::GetContentRegionAvail().x, 0 });
+	const char *label = data.recording ? "Stop Recording" : "Start Recording";
+	data.recording ^= ImGui::Button(label, { ImGui::GetContentRegionAvail().x, 0 });
 
-	ImGui::PushItemWidth(std::max(ImGui::GetContentRegionAvail().x - 250.f, 180.0f));
+	float left = std::max(ImGui::GetContentRegionAvail().x - 220.f, data.config.OverlayListWidth);
+	float right = -70.0f;
+	float gap = 15.0f;
+
+	ImGui::PushItemWidth(left);
 	ImGui::InputText("Output Name", &data.config.OutputName);
 	ImGui::PopItemWidth();
-	ImGui::SameLine();
-	ImGui::PushItemWidth(70.0f);
+
+	ImGui::SameLine(0, gap);
+
+	ImGui::PushItemWidth(right);
+	ImGui::InputText("Extension", &data.config.OutputExtension);
+	ImGui::PopItemWidth();
+
+	ImGui::PushItemWidth(left);
+	ImGui::InputText("FFmpeg Args", &data.config.FFmpegArgs);
+	ImGui::PopItemWidth();
+
+	ImGui::SameLine(0, gap);
+
+	ImGui::PushItemWidth(right);
 	ImGui::DragInt("Framerate", &data.config.Framerate, 1.0f, 0, std::numeric_limits<int>::max());
 	ImGui::PopItemWidth();
 

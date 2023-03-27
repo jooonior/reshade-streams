@@ -33,6 +33,15 @@
     <ClCompile Include="stream.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="process.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="winutils.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="recording.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.hpp">
