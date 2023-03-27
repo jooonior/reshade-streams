@@ -8,6 +8,8 @@
 
 #include <algorithm>
 
+import config;
+
 void draw_overlay(reshade::api::effect_runtime *runtime)
 {
 	runtime_data &data = runtime->get_private_data<runtime_data>();
@@ -16,11 +18,11 @@ void draw_overlay(reshade::api::effect_runtime *runtime)
 	ImGui::Button("Start Recording", { ImGui::GetContentRegionAvail().x, 0 });
 
 	ImGui::PushItemWidth(std::max(ImGui::GetContentRegionAvail().x - 250.f, 180.0f));
-	ImGui::InputText("Output Name", &data.output_name);
+	ImGui::InputText("Output Name", &data.config.OutputName);
 	ImGui::PopItemWidth();
 	ImGui::SameLine();
 	ImGui::PushItemWidth(70.0f);
-	ImGui::DragInt("Framerate", &data.framerate, 1.0f, 0, std::numeric_limits<int>::max());
+	ImGui::DragInt("Framerate", &data.config.Framerate, 1.0f, 0, std::numeric_limits<int>::max());
 	ImGui::PopItemWidth();
 
 	ImVec2 space_to_fill = ImGui::GetContentRegionAvail();

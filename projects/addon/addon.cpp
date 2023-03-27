@@ -7,10 +7,14 @@
 static void on_init_effect_runtime(reshade::api::effect_runtime *runtime)
 {
 	runtime_data &data = runtime->create_private_data<runtime_data>();
+	data.config.load(runtime);
 }
 
 static void on_destroy_effect_runtime(reshade::api::effect_runtime *runtime)
 {
+	runtime_data &data = runtime->get_private_data<runtime_data>();
+	data.config.save(runtime);
+
 	runtime->destroy_private_data<runtime_data>();
 }
 
