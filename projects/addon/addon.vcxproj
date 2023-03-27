@@ -190,13 +190,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Create</PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Create</PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="stream.ixx" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="addon.hpp" />
     <ClInclude Include="overlay.hpp" />
     <ClInclude Include="reflection.hpp" />
     <ClInclude Include="stdafx.hpp" />
-    <ClInclude Include="stream.hpp" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

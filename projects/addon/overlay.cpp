@@ -9,6 +9,7 @@
 #include <algorithm>
 
 import config;
+import stream;
 
 void draw_overlay(reshade::api::effect_runtime *runtime)
 {

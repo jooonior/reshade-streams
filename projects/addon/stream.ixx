@@ -1,10 +1,12 @@
-#pragma once
+module;
 
-#include <reshade.hpp>
+#include "stdafx.hpp"
 
 #include <string>
 
-struct stream
+export module stream;
+
+export struct stream
 {
 	reshade::api::effect_texture_variable texture_variable;
 	std::string variable_name;

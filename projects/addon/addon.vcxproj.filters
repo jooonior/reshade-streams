@@ -30,15 +30,15 @@
     <ClCompile Include="config.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="stream.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="addon.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="stream.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="overlay.hpp">
