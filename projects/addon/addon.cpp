@@ -1,8 +1,8 @@
 #include "stdafx.hpp"
-#include "addon.hpp"
 
 #include <string>
 
+import addon;
 import config;
 import overlay;
 

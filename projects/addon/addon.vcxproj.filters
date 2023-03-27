@@ -42,12 +42,12 @@
     <ClCompile Include="recording.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
+    <ClCompile Include="addon.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="stdafx.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="addon.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="reflection.hpp">

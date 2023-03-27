@@ -1,7 +1,6 @@
 module;
 
 #include "stdafx.hpp"
-#include "addon.hpp"
 
 #include <imgui_stdlib.h>
 
@@ -9,6 +8,7 @@ module;
 
 export module overlay;
 
+import addon;
 import config;
 import stream;
 

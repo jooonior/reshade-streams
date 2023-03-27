@@ -182,6 +182,7 @@
       <AdditionalIncludeDirectories Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(ProjectDir);%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <ClCompile Include="addon.cpp" />
+    <ClCompile Include="addon.ixx" />
     <ClCompile Include="config.ixx" />
     <ClCompile Include="overlay.ixx" />
     <ClCompile Include="process.ixx" />
@@ -196,7 +197,6 @@
     <ClCompile Include="winutils.ixx" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="addon.hpp" />
     <ClInclude Include="reflection.hpp" />
     <ClInclude Include="stdafx.hpp" />
   </ItemGroup>
