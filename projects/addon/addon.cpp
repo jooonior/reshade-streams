@@ -22,16 +22,17 @@ static void on_reshade_reloaded_effects(reshade::api::effect_runtime *runtime)
 	data.streams.clear();
 
 	runtime->enumerate_texture_variables(nullptr, [&](reshade::api::effect_runtime *runtime, reshade::api::effect_texture_variable variable) {
+		data.streams.emplace_back(variable);
+		stream &stream = data.streams.back();
+
 		// Get buffer length required to hold the name.
 		size_t length;
 		runtime->get_texture_variable_name(variable, nullptr, &length);
 
 		// Get the name itself.
-		std::string name(length, 0);
+		stream.variable_name.resize(length);
 		length += 1;  // null terminator
-		runtime->get_texture_variable_name(variable, name.data(), &length);
-
-		data.streams.emplace_back(variable, name);
+		runtime->get_texture_variable_name(variable, stream.variable_name.data(), &length);
 	});
 
 	for (auto &stream : data.streams)
