@@ -41,7 +41,7 @@ static void on_reshade_reloaded_effects(reshade::api::effect_runtime *runtime)
 
 	for (auto &stream : data.streams)
 	{
-		log_message(reshade::log_level::debug, "Found texture variable: {}", stream.variable_name);
+		log_debug("Found texture variable: {}", stream.variable_name);
 	}
 }
 
