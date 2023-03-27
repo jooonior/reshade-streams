@@ -1,17 +1,18 @@
-#pragma once;
+module;
 
 #include "stdafx.hpp"
 #include "addon.hpp"
-#include "overlay.hpp"
 
 #include <imgui_stdlib.h>
 
 #include <algorithm>
 
+export module overlay;
+
 import config;
 import stream;
 
-void draw_overlay(reshade::api::effect_runtime *runtime)
+export void draw_overlay(reshade::api::effect_runtime *runtime)
 {
 	runtime_data &data = runtime->get_private_data<runtime_data>();
 	reshade::api::device *device = runtime->get_device();
@@ -28,7 +29,7 @@ void draw_overlay(reshade::api::effect_runtime *runtime)
 
 	ImVec2 space_to_fill = ImGui::GetContentRegionAvail();
 
-	ImGui::BeginChild("Stream List", { data.overlay.stream_list_width, 0.0f }, true);
+	ImGui::BeginChild("Stream List", { data.config.OverlayListWidth, 0.0f }, true);
 
 	for (auto &stream : data.streams)
 	{
@@ -47,7 +48,7 @@ void draw_overlay(reshade::api::effect_runtime *runtime)
 		// Handle is being dragged.
 		const float min_width = 10.0f;
 		const float max_width = space_to_fill.x - 30.0f;
-		data.overlay.stream_list_width = std::clamp(data.overlay.stream_list_width + ImGui::GetIO().MouseDelta.x, min_width, max_width);
+		data.config.OverlayListWidth = std::clamp(data.config.OverlayListWidth + ImGui::GetIO().MouseDelta.x, min_width, max_width);
 	}
 
 	ImGui::SameLine();

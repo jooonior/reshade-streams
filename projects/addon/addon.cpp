@@ -1,8 +1,9 @@
 #include "stdafx.hpp"
 #include "addon.hpp"
-#include "overlay.hpp"
 
 #include <string>
+
+import overlay;
 
 static void on_init_effect_runtime(reshade::api::effect_runtime *runtime)
 {

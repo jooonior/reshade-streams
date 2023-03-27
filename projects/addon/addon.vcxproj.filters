@@ -21,7 +21,7 @@
     <ClCompile Include="stdafx.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="overlay.cpp">
+    <ClCompile Include="overlay.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="$(SolutionDir)deps\reshade\deps\imgui\misc\cpp\imgui_stdlib.cpp">
@@ -39,9 +39,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="addon.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="overlay.hpp">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="reflection.hpp">
