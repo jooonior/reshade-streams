@@ -3,6 +3,7 @@
 
 #include <string>
 
+import config;
 import overlay;
 
 static void on_init_effect_runtime(reshade::api::effect_runtime *runtime)
@@ -27,22 +28,28 @@ static void on_reshade_reloaded_effects(reshade::api::effect_runtime *runtime)
 	data.streams.clear();
 
 	runtime->enumerate_texture_variables(nullptr, [&](reshade::api::effect_runtime *runtime, reshade::api::effect_texture_variable variable) {
-		data.streams.emplace_back(variable);
-		stream &stream = data.streams.back();
-
 		// Get buffer length required to hold the name.
 		size_t length;
 		runtime->get_texture_variable_name(variable, nullptr, &length);
 
 		// Get the name itself.
-		stream.variable_name.resize(length);
+		std::string name(length, 0);
 		length += 1;  // null terminator
-		runtime->get_texture_variable_name(variable, stream.variable_name.data(), &length);
+		runtime->get_texture_variable_name(variable, name.data(), &length);
+
+		// Only interested in variables matching our prefix.
+		if (!name.starts_with(data.config.StreamPrefix))
+			return;
+
+		// Strip prefix.
+		name.erase(0, data.config.StreamPrefix.size());
+
+		data.streams.emplace_back(variable, std::move(name));
 	});
 
 	for (auto &stream : data.streams)
 	{
-		log_debug("Found texture variable: {}", stream.variable_name);
+		log_debug("Found texture variable: {}", stream.name);
 	}
 }
 
@@ -60,6 +67,7 @@ BOOL APIENTRY DllMain(HMODULE hModule, DWORD fdwReason, LPVOID)
 		reshade::register_event<reshade::addon_event::destroy_effect_runtime>(on_destroy_effect_runtime);
 		reshade::register_event<reshade::addon_event::reshade_reloaded_effects>(on_reshade_reloaded_effects);
 		reshade::register_overlay("Streams", draw_overlay);
+		reshade::register_overlay(nullptr, draw_settings_overlay);
 		break;
 	case DLL_PROCESS_DETACH:
 		reshade::unregister_addon(hModule);

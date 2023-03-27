@@ -63,7 +63,8 @@ public:
 	REFLECT(
 		(std::string)(OutputName)(""),
 		(int)(Framerate)(0),
-		(float)(OverlayListWidth)(180.0f)
+		(float)(OverlayListWidth)(180.0f),
+		(std::string)(StreamPrefix)("STREAM_")
 	)
 
 private:

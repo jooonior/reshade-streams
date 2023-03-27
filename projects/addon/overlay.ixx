@@ -12,6 +12,13 @@ export module overlay;
 import config;
 import stream;
 
+export void draw_settings_overlay(reshade::api::effect_runtime *runtime)
+{
+	runtime_data &data = runtime->get_private_data<runtime_data>();
+
+	ImGui::InputText("Stream Prefix", &data.config.StreamPrefix);
+}
+
 export void draw_overlay(reshade::api::effect_runtime *runtime)
 {
 	runtime_data &data = runtime->get_private_data<runtime_data>();
@@ -33,7 +40,7 @@ export void draw_overlay(reshade::api::effect_runtime *runtime)
 
 	for (auto &stream : data.streams)
 	{
-		ImGui::Checkbox(stream.variable_name.c_str(), &stream.selected);
+		ImGui::Checkbox(stream.name.c_str(), &stream.selected);
 	}
 
 	ImGui::EndChild();
@@ -60,7 +67,7 @@ export void draw_overlay(reshade::api::effect_runtime *runtime)
 		if (!stream.selected)
 			continue;
 
-		if (ImGui::CollapsingHeader(stream.variable_name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
+		if (ImGui::CollapsingHeader(stream.name.c_str(), ImGuiTreeNodeFlags_DefaultOpen))
 		{
 			reshade::api::resource_view view = {};
 			runtime->get_texture_binding(stream.texture_variable, &view);
