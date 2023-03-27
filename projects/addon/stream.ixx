@@ -76,7 +76,7 @@ bool stream::update(reshade::api::effect_runtime *runtime, bool should_record, c
 	return true;
 }
 
-const char *convert_pixel_format(reshade::api::format fmt)
+export const char *convert_pixel_format(reshade::api::format fmt)
 {
 	switch (reshade::api::format_to_typeless(fmt))
 	{
