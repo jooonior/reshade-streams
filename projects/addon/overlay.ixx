@@ -36,6 +36,8 @@ void draw_stream_details(reshade::api::effect_runtime *runtime, stream &stream)
 {
 	reshade::api::device *device = runtime->get_device();
 
+	ImGui::PushID(stream.name.c_str());
+
 	bool expanded = ImGui::CollapsingHeader(stream.name.c_str(), ImGuiTreeNodeFlags_DefaultOpen);
 
 	reshade::api::resource_view view = {};
@@ -58,12 +60,18 @@ void draw_stream_details(reshade::api::effect_runtime *runtime, stream &stream)
 	ImGui::SameLine(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(pix_fmt).x);  // right align
 	ImGui::Text("%s", pix_fmt);
 
-	if (!expanded)
-		return;
+	constexpr auto extra_args_label = "Extra Args";
+	ImGui::PushItemWidth(std::max(ImGui::GetContentRegionAvail().x - ImGui::CalcTextSize(extra_args_label).x - 10.0f, 1.0f));
+	ImGui::InputTextWithHint(extra_args_label, "additional FFmpeg arguments", &stream.ffmpeg_args);
+	ImGui::PopItemWidth();
 
-	const float aspect_ratio = float(desc.texture.width) / float(desc.texture.height);
-	float width = ImGui::GetContentRegionAvail().x;
-	ImGui::Image(view.handle, { width, width / aspect_ratio });
+	if (expanded) {
+		const float aspect_ratio = float(desc.texture.width) / float(desc.texture.height);
+		float width = ImGui::GetContentRegionAvail().x;
+		ImGui::Image(view.handle, { width, width / aspect_ratio });
+	}
+
+	ImGui::PopID();
 }
 
 export void draw_overlay(reshade::api::effect_runtime *runtime)
