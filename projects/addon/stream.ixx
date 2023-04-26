@@ -9,6 +9,12 @@ export module stream;
 
 import config;
 import recording;
+import utils;
+
+export struct stream_error : std::runtime_error
+{
+	using std::runtime_error::runtime_error;
+};
 
 export class stream
 {
@@ -31,51 +37,85 @@ public:
 
 	bool update(reshade::api::effect_runtime *runtime, bool should_record, const config &config);
 
-	bool start_recording(reshade::api::effect_runtime *runtime, const config &config);
+private:
+	void start_recording(reshade::api::effect_runtime *runtime, const config &config);
 
-	bool record_frame(reshade::api::effect_runtime *runtime);
+	void record_frame(reshade::api::effect_runtime *runtime);
 
-	bool end_recording();
+	void end_recording();
+
+	reshade::api::resource get_resource(reshade::api::effect_runtime *runtime)
+	{
+		reshade::api::device *device = runtime->get_device();
+
+		reshade::api::resource_view view = {};
+		runtime->get_texture_binding(texture_variable, &view);
+		if (view == 0)
+		{
+			throw stream_error("Could not get stream texture binding.");
+		}
+
+		reshade::api::resource res = device->get_resource_from_view(view);
+		if (res == 0)
+		{
+			throw stream_error("Could not get stream texture resource.");
+		}
+
+		return res;
+	}
 };
 
 bool stream::update(reshade::api::effect_runtime *runtime, bool should_record, const config &config)
 {
-	if (selected && should_record != is_recording())
+	try
 	{
-		if (should_record)
+		if (selected && should_record != is_recording())
 		{
-			if (!start_recording(runtime, config))
+			if (should_record)
 			{
-				log_error("Could not start recording stream '{}'.", name);
+				start_recording(runtime, config);
 			}
 			else
 			{
-				log_info("Recording stream '{}' to '{}'.", name, _filename);
+				end_recording();
 			}
 		}
-		else
-		{
-			if (end_recording())
-			{
-				log_info("Stopped recording stream '{}' to '{}'.", name, _filename);
-			}
-		}
+	}
+	catch (stream_error &e)
+	{
+		print_exception(e);
+		return false;
 	}
 
 	if (!is_recording())
 		return false;
 
-	if (!record_frame(runtime))
+	try
 	{
-		log_error("Could not record frame. Recording of stream '{}' failed.", name);
+		record_frame(runtime);
+	}
+	catch (stream_error &e)
+	{
+		print_exception(e);
 
-		end_recording();
+		// This happens when FFmpeg exits because of invalid input. In that case
+		// the above message doesn't say anything useful, but end_recording() below
+		// fails with more useful error (process exited with nonzero code).
+
+		try {
+			end_recording();
+		}
+		catch (stream_error &e) {
+			print_exception(e);
+		}
+
 		return false;
 	}
 
 	return true;
 }
 
+// Maps to pixel format strings recognized by ffmpeg CLI, also used from addon overlay.
 export const char *convert_pixel_format(reshade::api::format fmt)
 {
 	switch (reshade::api::format_to_typeless(fmt))
@@ -89,113 +129,104 @@ export const char *convert_pixel_format(reshade::api::format fmt)
 	}
 }
 
-bool stream::start_recording(reshade::api::effect_runtime *runtime, const config &config)
+void stream::start_recording(reshade::api::effect_runtime *runtime, const config &config)
 {
-	// Must be set for error messages.
+	// Used in potential error messages, so set early.
 	_filename = config.OutputName + name + '.' + config.OutputExtension;
+	log_info("Recording '{}' to '{}'.", name, _filename);
 
 	reshade::api::device *device = runtime->get_device();
 
-	reshade::api::resource_view view = {};
-	runtime->get_texture_binding(texture_variable, &view);
-
-	if (view == 0)
+	try
 	{
-		log_error("Could not get stream texture binding.");
-		return false;
+		reshade::api::resource res = get_resource(runtime);
+		reshade::api::resource_desc desc = device->get_resource_desc(get_resource(runtime));
+
+		const char *pixel_format = convert_pixel_format(desc.texture.format);
+		if (pixel_format == nullptr)
+		{
+			throw stream_error("Stream texture has an unsupported pixel format.");
+		}
+
+		reshade::api::resource_desc host_desc = {
+			desc.texture.width, desc.texture.height,
+			1, 1,
+			format_to_default_typed(desc.texture.format),
+			1,
+			reshade::api::memory_heap::gpu_to_cpu, reshade::api::resource_usage::copy_dest
+		};
+
+		if (!device->create_resource(host_desc, nullptr, reshade::api::resource_usage::copy_dest, &_intermediate))
+		{
+			throw stream_error("Failed to create host resource.");
+		}
+
+		auto args = std::format("-r {} -pixel_format {} -video_size {}x{}",
+								config.Framerate, pixel_format, desc.texture.width, desc.texture.height);
+
+		_recording.start(config.FFmpegPath, _filename, args, config.FFmpegArgs);
 	}
-
-	reshade::api::resource res = device->get_resource_from_view(view);
-	reshade::api::resource_desc desc = device->get_resource_desc(res);
-
-	const char *pixel_format = convert_pixel_format(desc.texture.format);
-	if (!pixel_format)
-	{
-		log_error("Stream texture has an unsupported pixel format.");
-		return false;
-	}
-
-	reshade::api::resource_desc host_desc = {
-		desc.texture.width, desc.texture.height,
-		1, 1,
-		format_to_default_typed(desc.texture.format),
-		1,
-		reshade::api::memory_heap::gpu_to_cpu, reshade::api::resource_usage::copy_dest
-	};
-
-	if (!device->create_resource(host_desc, nullptr, reshade::api::resource_usage::copy_dest, &_intermediate))
-	{
-		log_error("Failed to create host resource.");
-		return false;
-	}
-
-	auto args = std::format("-r {} -pixel_format {} -video_size {}x{}",
-							config.Framerate, pixel_format, desc.texture.width, desc.texture.height);
-
-	if (!_recording.start(config.FFmpegPath, _filename, args, config.FFmpegArgs))
+	catch (std::exception &)
 	{
 		device->destroy_resource(_intermediate);
 
-		return false;
+		auto message = std::format("Could not start recording stream '{}'.", name);
+		std::throw_with_nested(stream_error(message));
 	}
-
-	return true;
 }
 
-bool stream::record_frame(reshade::api::effect_runtime *runtime)
+void stream::record_frame(reshade::api::effect_runtime *runtime)
 {
 	reshade::api::device *device = runtime->get_device();
 
-	reshade::api::resource_view view = {};
-	runtime->get_texture_binding(texture_variable, &view);
-
-	if (view == 0)
+	try
 	{
-		log_error("Could not get stream texture binding.", name);
-		return false;
+		reshade::api::resource res = get_resource(runtime);
+		reshade::api::resource_desc desc = device->get_resource_desc(res);
+
+		// Copy stream texture into intermediate buffer.
+
+		reshade::api::command_list *const cmd_list = runtime->get_command_queue()->get_immediate_command_list();
+		cmd_list->barrier(res, reshade::api::resource_usage::shader_resource, reshade::api::resource_usage::copy_source);
+		cmd_list->copy_texture_region(res, 0, nullptr, _intermediate, 0, nullptr);
+		cmd_list->barrier(res, reshade::api::resource_usage::copy_source, reshade::api::resource_usage::shader_resource);
+
+		runtime->get_command_queue()->flush_immediate_command_list();
+		runtime->get_command_queue()->wait_idle();
+
+		// Map intermediate buffer into CPU address space.
+
+		reshade::api::subresource_data host_data;
+		if (!device->map_texture_region(_intermediate, 0, nullptr, reshade::api::map_access::read_only, &host_data))
+		{
+			throw stream_error("Could not access stream texture data.");
+		}
+
+		context_manager unmap_texture_region([&] { device->unmap_texture_region(_intermediate, 0); });
+
+		// Send intermediate buffer contents to recording.
+		// Assumes resource properties match video parameters and fails horribly if not.
+
+		size_t frame_size = host_data.row_pitch * desc.texture.height;
+		_recording.push_frame(host_data.data, frame_size);
 	}
-
-	reshade::api::resource res = device->get_resource_from_view(view);
-	reshade::api::resource_desc desc = device->get_resource_desc(res);
-
-	// Copy stream texture into intermediate buffer.
-
-	reshade::api::command_list *const cmd_list = runtime->get_command_queue()->get_immediate_command_list();
-	cmd_list->barrier(res, reshade::api::resource_usage::shader_resource, reshade::api::resource_usage::copy_source);
-	cmd_list->copy_texture_region(res, 0, nullptr, _intermediate, 0, nullptr);
-	cmd_list->barrier(res, reshade::api::resource_usage::copy_source, reshade::api::resource_usage::shader_resource);
-
-	runtime->get_command_queue()->flush_immediate_command_list();
-	runtime->get_command_queue()->wait_idle();
-
-	// Map intermediate buffer into CPU address space.
-
-	reshade::api::subresource_data host_data;
-	if (!device->map_texture_region(_intermediate, 0, nullptr, reshade::api::map_access::read_only, &host_data))
+	catch (std::exception &)
 	{
-		log_error("Could not access stream texture data.");
-		return false;
+		auto message = std::format("Could not record frame. Recording of stream '{}' failed.", name);
+		std::throw_with_nested(stream_error(message));
 	}
-
-	// Send intermediate buffer contents to recording.
-	// Assumes resource properties match video parameters and fails horribly if not.
-
-	size_t frame_size = host_data.row_pitch * desc.texture.height;
-	bool success = _recording.push_frame(host_data.data, frame_size);
-
-	device->unmap_texture_region(_intermediate, 0);
-
-	return success;
 }
 
-bool stream::end_recording()
+void stream::end_recording()
 {
-	if (!_recording.stop())
+	try
 	{
-		log_warning("'{}' may be corrupted.", _filename);
-
-		return false;
+		_recording.stop();
+		log_info("Stopped recording '{}' to '{}'.", name, _filename);
 	}
-
-	return true;
+	catch (std::exception &)
+	{
+		auto message = std::format("Could not stop recording '{}' properly, output '{}' may be corrupted.", name, _filename);
+		std::throw_with_nested(stream_error(message));
+	}
 }

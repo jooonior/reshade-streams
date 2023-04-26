@@ -36,13 +36,16 @@
     <ClCompile Include="process.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="winutils.ixx">
+    <ClCompile Include="windows.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="recording.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
     <ClCompile Include="addon.ixx">
+      <Filter>Source Files</Filter>
+    </ClCompile>
+    <ClCompile Include="utils.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
   </ItemGroup>

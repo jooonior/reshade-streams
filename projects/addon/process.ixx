@@ -3,25 +3,35 @@ module;
 #include "stdafx.hpp"
 
 #include <Windows.h>
+#include <wil/resource.h>
+
+#include <format>
+#include <stdexcept>
 
 export module process;
 
-import winutils;
+import utils;
+import windows;
+
+export struct process_error : std::runtime_error
+{
+	using std::runtime_error::runtime_error;
+};
 
 export class process
 {
 public:
-	bool redirect_input();
+	void redirect_input();
 
-	bool redirect_output(const char *file);
+	void redirect_output(const char *file);
 
-	bool start(const char *path, char *args);
+	void start(const char *path, char *args);
 
-	bool send_input(const void *data, size_t length);
+	void send_input(const void *data, size_t length);
 
 	int wait_for_exit();
 
-	bool close();
+	void close() noexcept;
 
 	process() = default;
 
@@ -34,17 +44,16 @@ public:
 
 private:
 	struct pipe {
-		HANDLE read = INVALID_HANDLE_VALUE;
-		HANDLE write = INVALID_HANDLE_VALUE;
+		wil::unique_handle read;
+		wil::unique_handle write;
 	};
 
 	pipe _stdin;
 	pipe _stdout;
 	// pipe _stderr;
 
-	PROCESS_INFORMATION _process_info;
+	wil::unique_process_information _process_info;
 };
-
 
 SECURITY_ATTRIBUTES security_attributes = {
 	.nLength = sizeof(SECURITY_ATTRIBUTES),
@@ -52,111 +61,105 @@ SECURITY_ATTRIBUTES security_attributes = {
 	.bInheritHandle = TRUE,
 };
 
-bool process::redirect_input()
+void process::redirect_input()
 {
-	if (!CreatePipe(&_stdin.read, &_stdin.write, &security_attributes, 0)) {
-		log_error("CreatePipe : {}", describe_last_error());
-		return false;
-	}
+	try
+	{
+		HANDLE read, write;
+		win::CreatePipe(&read, &write, &security_attributes, 0);
 
-	if (!SetHandleInformation(_stdin.write, HANDLE_FLAG_INHERIT, 0)) {
-		log_error("SetHandleInformation : {}", describe_last_error());
-		return false;
-	}
+		_stdin.read.reset(read);
+		_stdin.write.reset(write);
 
-	return true;
+		win::SetHandleInformation(_stdin.write.get(), HANDLE_FLAG_INHERIT, 0);
+	}
+	catch (std::exception &)
+	{
+		std::throw_with_nested(process_error("Could not set up input redirection."));
+	}
 }
 
-bool process::redirect_output(const char *file)
+void process::redirect_output(const char *file)
 {
-	HANDLE handle = CreateFileA(file, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE, &security_attributes, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
-
-	if (handle == INVALID_HANDLE_VALUE) {
-		log_error("CreateFileA : {}", describe_last_error());
-		return false;
+	try
+	{
+		HANDLE h = win::CreateFileA(file, GENERIC_WRITE, FILE_SHARE_READ | FILE_SHARE_WRITE,
+									&security_attributes, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+		_stdout.write.reset(h);
 	}
-
-	_stdout.write = handle;
-
-	return true;
+	catch (std::exception &)
+	{
+		auto message = std::format("Could not set up output redirection to '{}'.", file);
+		std::throw_with_nested(process_error(message));
+	}
 }
 
-bool process::start(const char *path, char *args)
+void process::start(const char *path, char *args)
 {
 	STARTUPINFOA startup_info = {
 		.cb = sizeof(STARTUPINFO),
 		.dwFlags = STARTF_USESTDHANDLES,
-		.hStdInput = _stdin.read,
-		.hStdOutput = _stdout.write,
-		.hStdError = _stdout.write,
+		.hStdInput = _stdin.read.get(),
+		.hStdOutput = _stdout.write.get(),
+		.hStdError = _stdout.write.get(),
 	};
 
-	BOOL success = CreateProcessA(
-		path,
-		args,
-		NULL,
-		NULL,
-		TRUE,
-		CREATE_NO_WINDOW,
-		NULL,
-		NULL,
-		&startup_info,
-		&_process_info);
-
-	close_handle(_stdin.read);
-	close_handle(_stdout.write);
-
-	if (!success) {
-		log_error("CreateProcessA : {}", describe_last_error());
-		return false;
+	try
+	{
+		win::CreateProcessA(path, args, NULL, NULL, TRUE, CREATE_NO_WINDOW, NULL, NULL, &startup_info, &_process_info);
+		_stdin.read.reset();
+		_stdout.write.reset();
 	}
-
-	close_handle(_process_info.hThread);
-	return true;
+	catch (std::exception)
+	{
+		auto message = std::format("Could not start process: {} {}", path ? path : "", args ? args : "");
+		std::throw_with_nested(process_error(message));
+	}
 }
 
 // Blocking.
-bool process::send_input(const void *data, size_t length)
+void process::send_input(const void *data, size_t length)
 {
 	DWORD written = 0;
-	BOOL result = WriteFile(_stdin.write, data, DWORD(length), &written, NULL);
 
-	if (!result) {
-		log_error("WriteFile : {}", describe_last_error());
-		return false;
+	try
+	{
+		win::WriteFile(_stdin.write.get(), data, DWORD(length), &written, NULL);
+	}
+	catch (std::exception &)
+	{
+		std::throw_with_nested(process_error("Could not write to standard input."));
 	}
 
 	if (written != length) {
 		log_warning("WriteFile : not all bytes were written");
-		return false;
 	}
-
-	return true;
 }
 
 int process::wait_for_exit() {
 	// No more input.
-	close_handle(_stdin.write);
+	_stdin.write.reset();
 
-	if (WaitForSingleObject(_process_info.hProcess, INFINITE) != 0) {
-		log_error("WaitForSingleObject : {}", describe_last_error());
-		return -1;
+	try
+	{
+		win::WaitForSingleObject(_process_info.hProcess, INFINITE);
+
+		DWORD exit_code;
+		win::GetExitCodeProcess(_process_info.hProcess, &exit_code);
+
+		return exit_code;
 	}
-
-	DWORD exit_code;
-	if (!GetExitCodeProcess(_process_info.hProcess, &exit_code)) {
-		log_error("GetExitCodeProcess : {}", describe_last_error());
-		return -1;
+	catch (std::exception &)
+	{
+		std::throw_with_nested(process_error("Could not wait for process to exit."));
 	}
-
-	return exit_code;
 }
 
-bool process::close()
+void process::close() noexcept
 {
-	close_handle(_process_info.hProcess);
-	close_handle(_stdin.write);
-	close_handle(_stdout.read);
-
-	return true;
+	_process_info.reset();
+	_stdin.write.reset();
+	_stdin.read.reset();
+	_stdout.read.reset();
+	_stdout.write.reset();
 }

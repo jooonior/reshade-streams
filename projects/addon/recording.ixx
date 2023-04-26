@@ -12,6 +12,11 @@ import process;
 
 using std::string, std::string_view;
 
+export struct recording_error : std::runtime_error
+{
+	using std::runtime_error::runtime_error;
+};
+
 export class recording
 {
 private:
@@ -20,52 +25,67 @@ private:
 	string _logfile;
 
 public:
-	bool start(const string_view &executable, const string_view &filename, const string_view &args, const string_view &extra_args);
+	void start(const string_view &executable, const string_view &filename, const string_view &args, const string_view &extra_args);
 
 	bool is_running() const { return _is_running; }
 
-	bool push_frame(const void *data, size_t length) { return _ffmpeg.send_input(data, length); }
+	void push_frame(const void *data, size_t length)
+	{
+		_ffmpeg.send_input(data, length);
+	}
 
-	bool stop();
+	void stop();
 };
 
-bool recording::start(const string_view &executable, const string_view &filename, const string_view &args, const string_view &extra_args)
+void recording::start(const string_view &executable, const string_view &filename, const string_view &args, const string_view &extra_args)
 {
 	assert(!is_running());
 
-	auto cmd = std::format("\"{}\" -f rawvideo -y {} -i - {} -- \"{}\"",
-						   executable, args, extra_args, filename);
-	log_debug("{}", cmd);
-
-	_logfile = string(filename) + ".log";
-
-	if (!_ffmpeg.redirect_input() || !_ffmpeg.redirect_output(_logfile.c_str()) || !_ffmpeg.start(nullptr, cmd.data()))
+	try
 	{
-		return false;
+		auto cmd = std::format("\"{}\" -f rawvideo -y {} -i - {} -- \"{}\"",
+							   executable, args, extra_args, filename);
+		log_debug("{}", cmd);
+
+		_logfile = string(filename) + ".log";
+
+		_ffmpeg.redirect_input();
+		_ffmpeg.redirect_output(_logfile.c_str());
+		_ffmpeg.start(nullptr, cmd.data());
+	}
+	catch (...)
+	{
+		_ffmpeg.close();
+		throw;
 	}
 
 	_is_running = true;
-
-	return true;
 }
 
-bool recording::stop()
+void recording::stop()
 {
-	assert(is_running());
+	if (!is_running())
+		return;
 
 	_is_running = false;
 
-	int exit_code = _ffmpeg.wait_for_exit();
-	_ffmpeg.close();
+	int exit_code;
 
-	if (exit_code < 0)
-		return false;
-
-	if (exit_code > 0)
+	try
 	{
-		log_warning("FFmpeg exited with code {}, check '{}' for details.", exit_code, _logfile);
+		exit_code = _ffmpeg.wait_for_exit();
+	}
+	catch (...)
+	{
+		_ffmpeg.close();
+		throw;
 	}
 
-	return true;
+	_ffmpeg.close();
+
+	if (exit_code != 0) {
+		auto message = std::format("FFmpeg exited with code {}, check '{}' for details.", exit_code, _logfile);
+		throw recording_error(message);
+	}
 }
 
