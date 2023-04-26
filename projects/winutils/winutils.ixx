@@ -1,14 +1,12 @@
 module;
 
-#include "stdafx.hpp"
-
 #include <Windows.h>
 
 #include <algorithm>  // copy_n
 #include <string>
 #include <system_error>
 
-export module windows;
+export module winutils;
 
 namespace win
 {

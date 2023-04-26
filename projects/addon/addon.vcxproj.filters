@@ -36,9 +36,6 @@
     <ClCompile Include="process.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="windows.ixx">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="recording.ixx">
       <Filter>Source Files</Filter>
     </ClCompile>

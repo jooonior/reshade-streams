@@ -4,6 +4,9 @@ Microsoft Visual Studio Solution File, Format Version 12.00
 VisualStudioVersion = 17.5.33502.453
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "addon", "projects\addon\addon.vcxproj", "{6E62B98C-5CCE-471B-B756-C19176B951ED}"
+	ProjectSection(ProjectDependencies) = postProject
+		{61102E45-C63A-472C-8854-432980782C20} = {61102E45-C63A-472C-8854-432980782C20}
+	EndProjectSection
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "debug", "projects\dxsample\D3D12HelloConstBuffers.vcxproj", "{6F49D366-B5F1-432B-A3E8-5D1CA57865F9}"
 EndProject
@@ -11,6 +14,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 	ProjectSection(SolutionItems) = preProject
 		.editorconfig = .editorconfig
 	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "winutils", "projects\winutils\winutils.vcxproj", "{61102E45-C63A-472C-8854-432980782C20}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -36,6 +41,14 @@ Global
 		{6F49D366-B5F1-432B-A3E8-5D1CA57865F9}.Release|x64.Build.0 = Release|x64
 		{6F49D366-B5F1-432B-A3E8-5D1CA57865F9}.Release|x86.ActiveCfg = Release|Win32
 		{6F49D366-B5F1-432B-A3E8-5D1CA57865F9}.Release|x86.Build.0 = Release|Win32
+		{61102E45-C63A-472C-8854-432980782C20}.Debug|x64.ActiveCfg = Debug|x64
+		{61102E45-C63A-472C-8854-432980782C20}.Debug|x64.Build.0 = Debug|x64
+		{61102E45-C63A-472C-8854-432980782C20}.Debug|x86.ActiveCfg = Debug|Win32
+		{61102E45-C63A-472C-8854-432980782C20}.Debug|x86.Build.0 = Debug|Win32
+		{61102E45-C63A-472C-8854-432980782C20}.Release|x64.ActiveCfg = Release|x64
+		{61102E45-C63A-472C-8854-432980782C20}.Release|x64.Build.0 = Release|x64
+		{61102E45-C63A-472C-8854-432980782C20}.Release|x86.ActiveCfg = Release|Win32
+		{61102E45-C63A-472C-8854-432980782C20}.Release|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
