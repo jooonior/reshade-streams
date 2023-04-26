@@ -7,3 +7,6 @@
 [submodule "boost_preprocessor"]
 	path = deps/boost_preprocessor
 	url = https://github.com/boostorg/preprocessor
+[submodule "deps/wil"]
+	path = deps/wil
+	url = https://github.com/microsoft/wil
