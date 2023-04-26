@@ -10,7 +10,7 @@ export module recording;
 
 import process;
 
-using std::string, std::string_view;
+using std::string_view;
 
 export struct recording_error : std::runtime_error
 {
@@ -22,10 +22,10 @@ export class recording
 private:
 	bool _is_running = false;
 	process _ffmpeg;
-	string _logfile;
+	std::string _logfile;
 
 public:
-	void start(const string_view &executable, const string_view &filename, const string_view &args, const string_view &extra_args);
+	void start(string_view executable, string_view filename, string_view input_options, string_view output_options);
 
 	bool is_running() const { return _is_running; }
 
@@ -37,17 +37,17 @@ public:
 	void stop();
 };
 
-void recording::start(const string_view &executable, const string_view &filename, const string_view &args, const string_view &extra_args)
+void recording::start(string_view executable, string_view filename, string_view input_options, string_view output_options)
 {
 	assert(!is_running());
 
 	try
 	{
 		auto cmd = std::format("\"{}\" -f rawvideo -y {} -i - {} -- \"{}\"",
-							   executable, args, extra_args, filename);
+							   executable, input_options, output_options, filename);
 		log_debug("{}", cmd);
 
-		_logfile = string(filename) + ".log";
+		_logfile = std::string(filename) + ".log";
 
 		_ffmpeg.redirect_input();
 		_ffmpeg.redirect_output(_logfile.c_str());

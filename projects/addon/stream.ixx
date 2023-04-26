@@ -161,10 +161,10 @@ void stream::start_recording(reshade::api::effect_runtime *runtime, const config
 			throw stream_error("Failed to create host resource.");
 		}
 
-		auto args = std::format("-r {} -pixel_format {} -video_size {}x{}",
-								config.Framerate, pixel_format, desc.texture.width, desc.texture.height);
+		auto input_options = std::format("-r {} -pixel_format {} -video_size {}x{}",
+										 config.Framerate, pixel_format, desc.texture.width, desc.texture.height);
 
-		_recording.start(config.FFmpegPath, _filename, args, config.FFmpegArgs);
+		_recording.start(config.FFmpegPath, _filename, input_options, config.FFmpegArgs);
 	}
 	catch (std::exception &)
 	{
