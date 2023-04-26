@@ -83,4 +83,6 @@ public:
 	{
 		reflector::for_each(*this, save_visitor(SECTION, runtime));
 	}
+
+	void reset() { *this = {}; }
 };

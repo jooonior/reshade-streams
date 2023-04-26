@@ -30,6 +30,12 @@ export void draw_settings_overlay(reshade::api::effect_runtime *runtime)
 	tooltip("Only variables named with this prefix will be listed as streams. Change requires reloading effects.");
 	ImGui::InputText("FFmpeg Path", &data.config.FFmpegPath);
 	tooltip("Path to FFmpeg executable. Can be absolute, relative, or just filename (to search PATH).");
+
+	ImGui::Spacing();
+
+	if (ImGui::Button("Restore Default Settings", { ImGui::GetContentRegionAvail().x, 0 })) {
+		data.config.reset();
+	}
 }
 
 void draw_stream_details(reshade::api::effect_runtime *runtime, stream &stream)
@@ -111,8 +117,13 @@ export void draw_overlay(reshade::api::effect_runtime *runtime)
 	ImGui::PopItemWidth();
 
 	ImGui::PushItemWidth(left);
-	ImGui::InputText("FFmpeg Args", &data.config.FFmpegArgs);
+	ImGui::InputTextWithHint("FFmpeg Args", "this should most likely not be empty", &data.config.FFmpegArgs);
 	ImGui::PopItemWidth();
+	if (data.config.FFmpegArgs.empty() && ImGui::IsItemHovered())
+	{
+		ImGui::SetTooltip("You can restore default settings under Add-ons > Streams.");
+	}
+
 
 	ImGui::SameLine(0, gap);
 
