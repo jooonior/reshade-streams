@@ -1,5 +1,7 @@
 module;
 
+#include <wc.hpp>
+
 #include <Windows.h>
 
 #include <algorithm>  // copy_n
@@ -35,49 +37,10 @@ namespace win
 		constexpr check_error(auto) : windows_error(std::string(Message)) {}
 
 	};
-
-	template<typename F, typename Err>
-	struct checked;
-
-	template<typename R, typename ...Args, typename Err>
-	struct checked<R(__stdcall)(Args...), Err>
-	{
-	public:
-		using return_type = R;
-		using function_type = R(__stdcall)(Args...);
-		using predicate_type = bool(R);
-		using error_type = Err;
-
-	private:
-		function_type *function;
-		predicate_type *predicate;
-
-	public:
-		consteval checked(function_type function, predicate_type predicate) : function{ function }, predicate{ predicate } {}
-
-		constexpr return_type operator()(Args... arg) const {
-			return_type result = function(std::forward<Args>(arg)...);
-
-			if (!predicate(result))
-				throw error_type(result);
-
-			return result;
-		}
-	};
-
-	template<typename F, F Function, typename Err>
-	struct checked_function : checked<F, Err>
-	{
-	private:
-		using base = checked<F, Err>;
-
-	public:
-		consteval checked_function(base::predicate_type predicate) : base(Function, predicate) {}
-	};
 }
 
-#define CHECKED(...) win::checked_function<decltype(::__VA_ARGS__), ::__VA_ARGS__, win::check_error<#__VA_ARGS__>>
-#define EXPORT_CHECKED(Function, ...) export namespace win { constexpr CHECKED(Function) Function(__VA_ARGS__); }
+#define CHECKED(...) wc::check(::__VA_ARGS__).with<win::check_error<#__VA_ARGS__>>
+#define EXPORT_CHECKED(Function, ...) export namespace win { constexpr auto Function = wc::static_checked<::Function, __VA_ARGS__, win::check_error<#Function>>; }
 
 #define EQUAL_TO(X) ([](auto x) { return x == X; })
 #define NOT_EQUAL_TO(X) ([](auto x) { return x != X; })
@@ -89,7 +52,7 @@ namespace win
 		if (object == INVALID_HANDLE_VALUE)
 			return FALSE;
 
-		constexpr CHECKED(CloseHandle) checked_close_handle(EQUAL_TO(TRUE));
+		constexpr auto checked_close_handle = CHECKED(CloseHandle)(EQUAL_TO(TRUE));
 		checked_close_handle(object);
 
 		object = INVALID_HANDLE_VALUE;

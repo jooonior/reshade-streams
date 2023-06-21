@@ -10,3 +10,6 @@
 [submodule "deps/wil"]
 	path = deps/wil
 	url = https://github.com/microsoft/wil
+[submodule "deps/wc"]
+	path = deps/wc
+	url = https://git.sr.ht/~steovd/wc
