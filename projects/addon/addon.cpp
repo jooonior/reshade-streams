@@ -1,10 +1,12 @@
 #include "stdafx.hpp"
 
+#include <sstream>
 #include <string>
 
 import addon;
 import config;
 import overlay;
+import utils;
 
 static void on_init_effect_runtime(reshade::api::effect_runtime *runtime)
 {
@@ -57,6 +59,18 @@ static void on_reshade_finish_effects(reshade::api::effect_runtime *runtime, res
 {
 	runtime_data &data = runtime->get_private_data<runtime_data>();
 	reshade::api::device *const device = runtime->get_device();
+
+	try
+	{
+		data.pipe_server.tick([](std::string_view message, std::ostream &reply) {
+			log_info("{}", message);
+			reply << message << std::endl;
+		});
+	}
+	catch (std::exception &e)
+	{
+		print_exception(e);
+	}
 
 	bool recording_streams = false;
 
