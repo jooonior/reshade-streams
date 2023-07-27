@@ -6,6 +6,7 @@
 import addon;
 import config;
 import overlay;
+import parser;
 import utils;
 
 static void on_init_effect_runtime(reshade::api::effect_runtime *runtime)
@@ -62,9 +63,20 @@ static void on_reshade_finish_effects(reshade::api::effect_runtime *runtime, res
 
 	try
 	{
-		data.pipe_server.tick([](std::string_view message, std::ostream &reply) {
-			log_info("{}", message);
-			reply << message << std::endl;
+		data.pipe_server.tick([&](std::string_view message, std::ostream &reply) {
+			log_debug("Received message: {}", message);
+
+			for (auto &tokens : tokenizer(message))
+			{
+				try
+				{
+					run_command(data, tokens);
+				}
+				catch (std::exception &e)
+				{
+					reply << e.what() << std::endl;
+				}
+			}
 		});
 	}
 	catch (std::exception &e)

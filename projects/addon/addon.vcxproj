@@ -189,6 +189,7 @@
     <ClCompile Include="addon.ixx" />
     <ClCompile Include="config.ixx" />
     <ClCompile Include="overlay.ixx" />
+    <ClCompile Include="parser.ixx" />
     <ClCompile Include="pipe_server.ixx" />
     <ClCompile Include="process.ixx" />
     <ClCompile Include="recording.ixx" />
