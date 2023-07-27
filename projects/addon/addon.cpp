@@ -36,8 +36,7 @@ static void on_reshade_reloaded_effects(reshade::api::effect_runtime *runtime)
 		runtime->get_texture_variable_name(variable, nullptr, &length);
 
 		// Get the name itself.
-		std::string name(length, 0);
-		length += 1;  // null terminator
+		std::string name(length - 1, 0);
 		runtime->get_texture_variable_name(variable, name.data(), &length);
 
 		// Only interested in variables matching our prefix.

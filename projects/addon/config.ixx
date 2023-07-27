@@ -24,13 +24,13 @@ struct save_visitor : config_visitor
 	void operator()(auto f) { save(f.name, f.value); }
 
 	void save(const char *key, std::string &value) {
-		reshade::config_set_value(runtime, section, key, value.c_str());
+		reshade::set_config_value(runtime, section, key, value.c_str());
 	}
 
 	template<typename U>
 	void save(const char *key, U &value)
 	{
-		reshade::config_set_value(runtime, section, key, value);
+		reshade::set_config_value(runtime, section, key, value);
 	}
 };
 
@@ -42,18 +42,17 @@ struct load_visitor : config_visitor
 
 	bool load(const char *key, std::string &value) {
 		size_t length = 0;
-		if (!reshade::config_get_value(runtime, section, key, nullptr, &length))
+		if (!reshade::get_config_value(runtime, section, key, nullptr, &length))
 			return false;
 
-		value.resize(length);
-		length += 1;  // null terminator
-		return reshade::config_get_value(runtime, section, key, value.data(), &length);
+		value.resize(length - 1);
+		return reshade::get_config_value(runtime, section, key, value.data(), &length);
 	}
 
 	template<typename U>
 	void load(const char *key, U &value)
 	{
-		reshade::config_get_value(runtime, section, key, value);
+		reshade::get_config_value(runtime, section, key, value);
 	}
 };
 
