@@ -80,7 +80,8 @@ static void on_reshade_finish_effects(reshade::api::effect_runtime *runtime, res
 	}
 	catch (std::exception &e)
 	{
-		print_exception(e);
+		// These exceptions are to be expected, printing them is too much noise.
+		// print_exception(e);
 	}
 
 	bool recording_streams = false;
