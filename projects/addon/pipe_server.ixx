@@ -108,6 +108,12 @@ public:
 		}
 	}
 
+	bool reconnect()
+	{
+		win::DisconnectNamedPipe(_pipe);
+		return connect();
+	}
+
 private:
 	bool connect()
 	{
@@ -125,12 +131,6 @@ private:
 		default:
 			throw res.make_error();
 		}
-	}
-
-	bool reconnect()
-	{
-		win::DisconnectNamedPipe(_pipe);
-		return connect();
 	}
 
 	bool wait()
@@ -243,7 +243,17 @@ public:
 				return false;
 			}
 
-			_pipes[wait - WAIT_OBJECT_0].resume(responder);
+			auto &pipe = _pipes[wait - WAIT_OBJECT_0];
+
+			try
+			{
+				pipe.resume(responder);
+			}
+			catch (std::exception &)
+			{
+				pipe.reconnect();
+				throw;
+			}
 
 			return true;
 		}
