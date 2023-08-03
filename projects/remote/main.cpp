@@ -1,3 +1,4 @@
+#include <format>
 #include <iostream>
 #include <string>
 #include <string_view>
@@ -90,11 +91,13 @@ void print(std::string_view message)
 	std::cout << std::flush;
 }
 
-bool run()
+bool run(const char *pipe_name)
 {
 	try
 	{
-		win::unique_data<HANDLE, CloseHandle, INVALID_HANDLE_VALUE> pipe = connect("\\\\.\\pipe\\ReShadeStreams");
+		std::cerr << "Connecting to '" << pipe_name << "'..." << std::endl;
+		win::unique_data<HANDLE, CloseHandle, INVALID_HANDLE_VALUE> pipe = connect(pipe_name);
+		std::cerr << "Connected. (use CTRL+C to exit)" << std::endl;
 
 		std::string buffer;
 
@@ -120,7 +123,30 @@ bool run()
 	}
 }
 
-int main()
+int main(int argc, char *argv[])
 {
-	return run() ? 0 : 1;
+	std::string id;
+
+	switch (argc)
+	{
+	case 1:
+		std::cout << "Enter addon instance ID.\n> ";
+		std::getline(std::cin, id);
+		break;
+	case 2:
+		id = argv[1];
+		break;
+	default:
+		std::cerr << "Usage: " << argv[0] << " [instance ID]" << std::endl;
+		return 1;
+	}
+
+	if (id.empty())
+	{
+		std::cerr << "No instance ID given." << std::endl;
+		return 1;
+	}
+
+	auto pipe_name = std::format("\\\\.\\pipe\\reshade-streams\\{}", id);
+	return run(pipe_name.c_str()) ? 0 : 1;
 }

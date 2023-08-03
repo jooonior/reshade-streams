@@ -19,7 +19,7 @@ export struct __declspec(uuid("d1ffba56-33cc-45a5-a53b-8e8723cf0143")) runtime_d
 {
 	std::vector<stream> streams;
 	config config;
-	pipe_server pipe_server{ "\\\\.\\pipe\\ReShadeStreams", 4 };
+	pipe_server pipe_server;
 	bool recording = false;
 };
 

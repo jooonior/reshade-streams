@@ -66,6 +66,7 @@ public:
 		(std::string)(FFmpegArgs)("-c:v libx264 -preset ultrafast -crf 18"),
 		(int)(Framerate)(0),
 		(float)(OverlayListWidth)(180.0f),
+		(std::string)(InstanceID)(""),
 		(std::string)(StreamPrefix)("STREAM_")
 	)
 

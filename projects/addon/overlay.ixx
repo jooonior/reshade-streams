@@ -30,6 +30,8 @@ export void draw_settings_overlay(reshade::api::effect_runtime *runtime)
 	tooltip("Only variables named with this prefix will be listed as streams. Change requires reloading effects.");
 	ImGui::InputText("FFmpeg Path", &data.config.FFmpegPath);
 	tooltip("Path to FFmpeg executable. Can be absolute, relative, or just filename (to search PATH).");
+	ImGui::InputTextWithHint("Instance ID", std::to_string(GetCurrentProcessId()).c_str(), &data.config.InstanceID);
+	tooltip("Used to control the addon remotely. Leave blank to copy process ID.");
 
 	ImGui::Spacing();
 

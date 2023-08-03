@@ -1,5 +1,6 @@
 #include "stdafx.hpp"
 
+#include <format>
 #include <sstream>
 #include <string>
 
@@ -13,12 +14,19 @@ static void on_init_effect_runtime(reshade::api::effect_runtime *runtime)
 {
 	runtime_data &data = runtime->create_private_data<runtime_data>();
 	data.config.load(runtime);
+
+	auto id = !data.config.InstanceID.empty() ? data.config.InstanceID : std::to_string(GetCurrentProcessId());
+	auto pipe = std::format("\\\\.\\pipe\\reshade-streams\\{}", id);
+	data.pipe_server.listen(pipe.c_str(), 4);
+
+	log_info("Server listening at '{}'.", pipe);
 }
 
 static void on_destroy_effect_runtime(reshade::api::effect_runtime *runtime)
 {
 	runtime_data &data = runtime->get_private_data<runtime_data>();
 	data.config.save(runtime);
+	data.pipe_server.shutdown();
 
 	runtime->destroy_private_data<runtime_data>();
 }

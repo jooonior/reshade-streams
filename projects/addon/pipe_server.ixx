@@ -222,12 +222,18 @@ private:
 	std::vector<HANDLE> _events;
 
 public:
-	pipe_server(const char *pipe_name, int instances)
+	void listen(const char *pipe_name, int instances)
 	{
 		for (int i = 0; i < instances; i++) {
 			_pipes.emplace_back(pipe_name, instances);
 			_events.push_back(_pipes.back().event());
 		}
+	}
+
+	void shutdown()
+	{
+		_pipes.clear();
+		_events.clear();
 	}
 
 	template<typename T>
